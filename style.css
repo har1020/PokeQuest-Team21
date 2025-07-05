@@ -1,0 +1,64 @@
+html, body { height: 100%; margin: 0; padding: 0; }
+#map { height: 100vh; width: 100vw; }
+.modal-content { border-radius: 1.2rem; box-shadow: 0 8px 32px rgba(0,0,0,0.2); }
+#pokemonImage { display: block; margin: 0 auto 1rem auto; max-width: 180px; animation: fadeIn 1s; }
+#congrats { font-weight: bold; color: #ffcb05; text-align: center; font-size: 1.2rem; margin-top: 1rem; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@media (max-width: 600px) {
+    .modal-dialog { max-width: 90vw; margin: 1.75rem auto; }
+    #pokemonImage { max-width: 120px; }
+}
+.leaflet-marker-icon.leaflet-zoom-animated {
+    transition: transform 0.2s cubic-bezier(.68,-0.55,.27,1.55);
+}
+.leaflet-marker-icon.bounce {
+    transform: scale(1.2) translateY(-10px);
+}
+#dashboard {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+#dashboard h1 { font-weight: 700; color: #2d72d9; }
+#dashboard p { max-width: 350px; }
+.spinner-border { width: 2rem; height: 2rem; }
+#mapContainer { height: 100vh; }
+body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f7fa; }
+.poke-marker-icon {
+    border-radius: 50%;
+    box-shadow: 0 2px 12px 0 rgba(0,0,0,0.18);
+    background: #fff;
+    border: 2px solid #ffcb05;
+    transition: transform 0.2s cubic-bezier(.68,-0.55,.27,1.55);
+}
+.poke-tooltip {
+    background: #fffbe6 !important;
+    color: #2d72d9 !important;
+    font-weight: bold;
+    border-radius: 8px !important;
+    border: 1px solid #ffcb05 !important;
+    box-shadow: 0 2px 8px 0 rgba(0,0,0,0.08);
+    padding: 4px 10px !important;
+}
+#pokemonDesc {
+    font-size: 1rem;
+    color: #888;
+}
+#progressDashboard {
+    transition: background 0.3s;
+}
+#caughtBadge {
+    animation: popIn 0.5s;
+}
+@keyframes popIn {
+    0% { transform: scale(0.5); opacity: 0; }
+    80% { transform: scale(1.2); opacity: 1; }
+    100% { transform: scale(1); }
+}
+#map img[alt="Pokémon Watermark"] {
+    pointer-events: none;
+    user-select: none;
+}

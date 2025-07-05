@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PokeQuest Scavenger Hunt</title>
+    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/PokeAPI/media/master/logo/pokeapi_256.png">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <style>
+      .poke-marker-icon {
+        filter: drop-shadow( 2px 8px rgba(0,0,0,0.18));
+      }
+      .poke-tooltip {
+        font-weight: bold;
+        font-size: 1.1rem;
+        background: #fffbe6;
+        color: #2d72d9;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      }
+      .bounce {
+        animation: bounce 0.4s;
+      }
+      @keyframes bounce {
+        0% { transform: translateY(0); }
+        30% { transform: translateY(-18px); }
+        60% { transform: translateY(0); }
+        100% { transform: translateY(-6px); }
+      }
+    </style>
+</head>
+<body class="h-full bg-gradient-to-br from-blue-50 to-pink-100 dark:from-gray-900 dark:to-gray-800 transition-colors duration-500">
+    <button id="themeToggle" aria-label="Toggle theme" class="fixed top-4 right-4 z-50 bg-white dark:bg-gray-700 rounded-full shadow-lg p-2 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-yellow-400">
+      <svg id="themeIcon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-400 dark:text-yellow-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.66-13.66l-.71.71M4.05 19.07l-.71.71M21 12h-1M4 12H3m16.66 5.66l-.71-.71M4.05 4.93l-.71-.71M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+      </svg>
+    </button>
+    <div id="dashboard" class="flex flex-col justify-center items-center min-h-screen px-4">
+        <img src="https://raw.githubusercontent.com/PokeAPI/media/master/logo/pokeapi_256.png" alt="Pokémon Logo" class="w-24 mb-4 drop-shadow-lg">
+        <h1 class="mb-2 text-4xl font-extrabold text-blue-700 dark:text-yellow-300 tracking-tight">PokeQuest Scavenger Hunt</h1>
+        <p class="mb-6 text-center max-w-md text-lg text-gray-700 dark:text-gray-200">Welcome! Explore the map, find clues, and discover Pokémon at real-world locations. Click below to start your adventure!</p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl mb-6">
+            <div class="rounded-xl shadow-xl bg-white dark:bg-gray-800 p-4 flex flex-col items-center transition-transform transform hover:scale-105">
+                <img src="dashboard-ss.png" alt="Dashboard Screenshot" class="rounded-lg object-cover h-40 w-full mb-2">
+                <h5 class="font-bold text-blue-600 dark:text-yellow-200">Welcome Dashboard</h5>
+                <p class="text-gray-500 dark:text-gray-300 text-sm">Start your adventure and view instructions.</p>
+            </div>
+            <div class="rounded-xl shadow-xl bg-white dark:bg-gray-800 p-4 flex flex-col items-center transition-transform transform hover:scale-105">
+                <img src="map-ss.png" alt="Map Screenshot" class="rounded-lg object-cover h-40 w-full mb-2">
+                <h5 class="font-bold text-blue-600 dark:text-yellow-200">Interactive Map</h5>
+                <p class="text-gray-500 dark:text-gray-300 text-sm">Explore hunt points and Pokémon markers.</p>
+            </div>
+            <div class="rounded-xl shadow-xl bg-white dark:bg-gray-800 p-4 flex flex-col items-center transition-transform transform hover:scale-105">
+                <img src="modal-ss.png" alt="Modal Screenshot" class="rounded-lg object-cover h-40 w-full mb-2">
+                <h5 class="font-bold text-blue-600 dark:text-yellow-200">Pokémon Reveal</h5>
+                <p class="text-gray-500 dark:text-gray-300 text-sm">See clues and Pokémon details in a modal.</p>
+            </div>
+        </div>
+        <button id="startHunt" class="mt-2 px-8 py-3 bg-gradient-to-r from-yellow-400 to-pink-400 text-white font-bold rounded-full shadow-lg text-lg hover:from-yellow-500 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition-all duration-300">Start Scavenger Hunt</button>
+    </div>
+    <div id="mapContainer" class="hidden h-full w-full fixed inset-0 z-10">
+        <div id="map" class="h-full w-full relative rounded-none">
+            <img src="https://raw.githubusercontent.com/PokeAPI/media/master/logo/pokeapi_256.png" alt="Pokémon Watermark" class="absolute bottom-6 right-6 w-20 opacity-10 pointer-events-none z-40 select-none">
+        </div>
+    </div>
+    <div id="pokemonModal" tabindex="-1" aria-labelledby="pokemonModalLabel" aria-modal="true" role="dialog" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
+        <div class="bg-gradient-to-br from-yellow-50 to-pink-100 dark:from-gray-800 dark:to-gray-700 rounded-2xl shadow-2xl p-6 w-full max-w-md relative animate-fadeIn">
+            <button id="closeModal" class="absolute top-3 right-3 text-gray-400 hover:text-red-400 text-2xl font-bold focus:outline-none">&times;</button>
+            <span id="caughtBadge" class="hidden bg-green-400 text-white px-3 py-1 rounded-full text-sm font-bold mb-2 inline-block">Caught!</span>
+            <span id="typeIcon" class="text-3xl"></span>
+            <p id="clue" class="mb-2 font-mono text-lg text-blue-700 dark:text-yellow-200"></p>
+            <img id="pokemonImage" src="" alt="Pokémon" class="mx-auto my-2 rounded-xl shadow-lg max-h-40 hidden">
+            <p id="pokemonName" class="text-xl font-bold mt-2"></p>
+            <p id="pokemonDesc" class="mb-2 text-gray-600 dark:text-gray-300"></p>
+            <p id="congrats" class="font-semibold text-pink-500 dark:text-yellow-300"></p>
+            <p id="errorMsg" class="text-red-500"></p>
+        </div>
+    </div>
+    <div id="progressDashboard" class="fixed bottom-0 left-0 w-full z-40 flex items-center justify-center py-2 px-4 bg-white dark:bg-gray-900 bg-opacity-90 shadow-lg transition-colors duration-500">
+        <div class="w-2/3 md:w-1/3 h-5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden shadow-inner">
+            <div id="progressBar" class="h-full bg-gradient-to-r from-yellow-400 to-pink-400 transition-all duration-500" style="width:0%"></div>
+        </div>
+        <span id="progressLabel" class="ml-4 font-bold text-gray-700 dark:text-yellow-200">0/6 Pokémon found</span>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
